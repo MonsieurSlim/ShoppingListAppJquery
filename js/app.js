@@ -1,56 +1,85 @@
-var textBox = $("#input_list_item");
 var listItem;
-//Add a delete button to the input text and paste it in the unPurchased section
-var createNewListItem = function () {
-	$("#unPurchased_items").append('<li><input type="checkbox" class="checkBox">' + listItem + '<button class="delete">Delete</button></li>') ;
-}
+var prevInputs = [];
 
-var deleteListItem = function (elem) {
-	console.log('del function')
-	elem.parents('li').remove();
-	return false;
-}
-var validate = function () {
-	listItem = textBox.val();
-	console.log(listItem);
-	if((listItem === "") || (listItem === " ") || (listItem.length > 20)){
+
+var Actions = {
+	init: function () {
+		// Attach event listeners
+		Actions.attachAddFormSubmitEvent();
+		Actions.attachDeleteButtonClickEvent();
+		Actions.attachCheckBoxChangeEvent();
+	},
+	
+	/*	==================================
+		EVENT LISTENERS
+	=====================================	*/
+	
+	// Do this when add button is clicked.
+	attachAddFormSubmitEvent: function (){
+		$("#addItemForm").submit(function(event) {
+			if(Actions.validate()) {
+				Actions.createNewListItem();
+				prevInputs.push(listItem);
+			} else {
+				$('#alert_area').html('Your Entry must not be empty, must not be more than 20 characters, and must not already exist in the List!');
+			}
+			return false;
+		})
+
+	},
+
+	// Do this when delete button is clicked.
+	attachDeleteButtonClickEvent: function (){
+		$(document).on('click', ".delete", function(event) {
+			console.log("Delete button clicked");
+			Actions.deleteListItem($(this));
+			
+		})
+	},
+
+	// Do this when checkbox is checked or unchecked.
+	attachCheckBoxChangeEvent: function (){
+		$(document).on('change', "input[type=checkbox]", function () {
+			var $elem = $(this);
+			if ($elem.is(':checked')) {
+				console.log("checkbox checked");
+				$("#purchased_items").append($elem.parent());
+			} else {
+				console.log("checkbox unchecked");
+				$("#unPurchased_items").append($elem.parent());
+			}
+			
+		})
+	},
+
+	/*	==================================
+		CALLBACK FUNCTIONS
+	=====================================	*/
+
+	//Add a delete button to the input text and paste it in the unPurchased section
+	createNewListItem: function () {
+		$("#unPurchased_items").append('<li><input type="checkbox" class="checkBox"><span class="item_text">' + listItem + '</span><button class="delete">Delete</button></li>') ;
+	},
+
+	deleteListItem: function (elem) {
+		var thisListItem = elem.prev().text();
+		prevInputs.splice(prevInputs.indexOf(thisListItem), 1);
+		elem.parents('li').remove();
 		return false;
-	}else {
-		return true;
-	}
-}
+	},
+
+	validate: function () {
+		listItem = $("#input_list_item").val().trim();
+			if((listItem === "") || (listItem.length > 20) || prevInputs.indexOf(listItem) >= 0 ) {
+				return false;
+			}
+			else{
+				return true;
+			}
+
+	},
 
 
-//When add button is clicked.
-$("#submit_list_item").click(function(event) {
-	console.log("Add button clicked.")
-	if(validate()){
-	createNewListItem();
-	}
-	else {
-		$('#alert_area').html('Your Entry must not be empty, and must have a maximum of 20 characters!');
-	}
-});
+};
 
-// When delete button is clicked.
-$(document).on('click', ".delete", function(event) {
-	console.log("Delete button clicked")
-	deleteListItem($(this));
-	
-});
-
-//When checkbox is checked or unchecked.
-
-$(document).on('change', "input[type=checkbox]", function () {
-	console.log($(this));
-	if (this.checked) {
-		console.log("checkbox checked");
-		$("#purchased_items").append($(this).parent());
-	}
-	else {
-		console.log("checkbox unchecked");
-		$("#unPurchased_items").append($(this).parent());
-	}
-	
-});
-
+Actions.init();
