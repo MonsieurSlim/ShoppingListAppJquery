@@ -17,17 +17,12 @@ var Actions = {
 	// Do this when add button is clicked.
 	attachAddFormSubmitEvent: function (){
 		$("#addItemForm").submit(function(event) {
+			event.preventDefault();
 			if(Actions.validate()) {
 				Actions.createNewListItem();
 				prevInputs.push(listItem);
-<<<<<<< HEAD
-				$('#alert_area').fadeOut('slow');
-			} else {
-				$('#alert_area').html('Your Entry must not be empty, must not be more than 20 characters, and must not already exist in the List!');
-=======
 			} else {
 				alert('Your Entry must not be empty, must not be more than 20 characters, and must not already exist in the List!');
->>>>>>> master
 			}
 			return false;
 		})
